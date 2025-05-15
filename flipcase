@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+from locale import getlocale
+from os.path import realpath
+from sys import argv, exit
+
+def help (display=True):
+    lang = getlocale()[0]
+    if display:
+        if lang[:2] != 'es':
+            print (f'\n -h, --help\t\tdisplay this help and exit')
+            print (f' -v, --version\t\toutput version information and exit')
+        else:
+            print (f'\n -h, --help\t\tMuestra esta ayuda y sale')
+            print (f' -v, --version\t\tMuestra la información de versión')
+    else:
+        return 'hello world' if lang[:2] != 'es' else 'hola mundo'
+
+real_file = realpath(__file__).split('/')[-1].split('.')[0]
+version = 0.1
+
+if len(argv) < 2:
+    if realpath(__file__) != realpath(argv[0]):
+        print()
+        exit ()
+    else:
+        argv.append('-h')
+
+command = argv[0].split('/')[-1].split('.')[0]
+command = 'capitalize' if command == 'capital' else command
+commands = ('capital', 'capitalize', 'lower', 'title', 'upper')
+argv_str = ' '.join(argv[1:])
+show = help(False)
+
+if len(argv) == 2 and argv[1] in ('-h', '--help') and command in commands:
+    if command == 'lower':
+        show = show.upper()
+    print (command, show)
+    if command in commands:
+        print ('\033[1mResult:\033[0m', getattr(show, command)())
+    help()
+elif len(argv) == 2 and argv[1] in ('-v', '--version'):
+    print (f'{command} (flipcase) {version}')
+elif command == real_file:
+    for i, cmd in enumerate(commands):
+        show = help(False)
+        usage_text = 'Usage' if getlocale()[0][:2] != 'es' else 'Modo de uso'
+        prev_text = usage_text + ': ' if i == 0 else ''
+        _cmd = 'capitalize' if cmd == 'capital' else cmd
+        result = getattr(show, _cmd)()
+        if cmd == 'lower':
+            show = show.upper()
+        n = len(usage_text) + 2
+        complet_input = cmd + ' ' + show
+        print(f"{prev_text:<{n}}{complet_input:<23} → {result}")
+    help()
+else:
+    print (getattr(argv_str, command)() + '\033[0m')
